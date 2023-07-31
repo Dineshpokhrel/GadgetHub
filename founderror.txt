@@ -1,0 +1,6 @@
+throw new Error(msg);
+        ^
+
+Error: Route.patch() requires a callback function but got a [object Undefined]
+
+Error: Route.post() requires a callback function but got a [object Undefined]

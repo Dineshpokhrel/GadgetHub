@@ -67,44 +67,44 @@ const addSubCategory = async (req, res) => {
   }
 };
 
-//  exports.updateSubcategory = async (req, res) => {
-//   try {
-//     const { name, description, category, status } = req.body;
-//     const subcategory = await SubCategory.findById(req.params.id).exec();
+ const updateSubcategory = async (req, res) => {
+  try {
+    const { name, description, category, status } = req.body;
+    const subcategory = await SubCategory.findById(req.params.id).exec();
 
-//     console.log(subcategory);
-//     if (subcategory) {
-//       const newSubCategory = await SubCategory.findByIdAndUpdate(req.params.id, { name, description, category, status }, { new: true })
-//         .populate("category", "_id name");
+    console.log(subcategory);
+    if (subcategory) {
+      const newSubCategory = await SubCategory.findByIdAndUpdate(req.params.id, { name, description, category, status }, { new: true })
+        .populate("category", "_id name");
 
-//       if (subcategory?.category._id !== newSubCategory?.category?._id) {
-//         await Category.findByIdAndUpdate(subcategory?.category._id, {
-//           $pull: {
-//             subcategory: subcategory?._id,
-//           }
-//         });
-//         await Category.findByIdAndUpdate(category?._id, {
-//           $push: {
-//             subcategory: subcategory?._id,
-//           }
-//         });
-//       }
-//       res.status(200).json({
-//         status: true, message: "Subcategory successfully updated.", data: newSubCategory
-//       });
-//       return;
-//     }
-//     res.status(404).json({ status: false, message: "Subcategory not found." });
+      if (subcategory?.category._id !== newSubCategory?.category?._id) {
+        await Category.findByIdAndUpdate(subcategory?.category._id, {
+          $pull: {
+            subcategory: subcategory?._id,
+          }
+        });
+        await Category.findByIdAndUpdate(category?._id, {
+          $push: {
+            subcategory: subcategory?._id,
+          }
+        });
+      }
+      res.status(200).json({
+        status: true, message: "Subcategory successfully updated.", data: newSubCategory
+      });
+      return;
+    }
+    res.status(404).json({ status: false, message: "Subcategory not found." });
 
-//   } catch (error) {
-//     console.error(error);
-//     res.status(400).json({ status: false, message: "Something went wrong when updating Subcategory." });
-//   }
-// };
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ status: false, message: "Something went wrong when updating Subcategory." });
+  }
+};
 
-exports.updateSubcategory =  function(req, res) {
-  return  res.json({ message:"Hi"}) ;
-}
+// exports.updateSubcategory =  function(req, res) {
+//   return  res.json({ message:"Hi"}) ;
+// }
 
 const deleteSubcategory = async (req, res) => {
   try {
@@ -141,16 +141,16 @@ const deleteSubcategory = async (req, res) => {
   }
 };
 
-// module.exports = {
-//   getSubCategories,
-//   getSubCategoriesOfCategory,
-//   addSubCategory,
-//   updateSubcategory,
-//   deleteSubcategory
-// };
 module.exports = {
   getSubCategories,
   getSubCategoriesOfCategory,
   addSubCategory,
+  updateSubcategory,
   deleteSubcategory
 };
+// module.exports = {
+//   getSubCategories,
+//   getSubCategoriesOfCategory,
+//   addSubCategory,
+//   deleteSubcategory
+// };
