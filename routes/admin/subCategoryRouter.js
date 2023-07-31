@@ -1,14 +1,19 @@
 const express = require('express');
 const router = new express.Router();
-// const subCategoryController = require('../../controllers/admin/subCategoryController');
-const {updateSubcategory}= require('../../controllers/admin/subCategoryController');
+const subCategoryController = require('../../controllers/admin/subCategoryController');
+// const {updateSubcategory}= require('../../controllers/admin/subCategoryController');
 
-const { validate } = require('../../middlewares/index');
+const validate  = require('../../middlewares/index');
 const adminValidator = require('../../middlewares/adminValidators');
 
 // console.log("test",subCategoryController.addSubCategory)
-// router.get("/subcategories", subCategoryController.getSubCategories);
-// router.get("/subcategories-of-category/:id", subCategoryController.getSubCategoriesOfCategory);
+router.get("/subcategories", subCategoryController.getSubCategories);
+router.get("/subcategories-of-category/:id", subCategoryController.getSubCategoriesOfCategory);
+router.post("/subcategory", adminValidator.addSubCategoryValidator, validate, subCategoryController.addSubCategory);
+router.patch("/subcategory/:id", adminValidator.addSubCategoryValidator, validate, subCategoryController.updateSubcategory);
+router.delete("/subcategory/:id", subCategoryController.deleteSubcategory);
+
+
 // router.post("/subcategory", adminValidator.addSubCategoryValidator, validate, async (req, res) => {
 //     try {
 //       const { name, description, image, category, status } = req.body;
@@ -34,9 +39,7 @@ const adminValidator = require('../../middlewares/adminValidators');
 //       return res.status(400).json({ status: false, message: "Something went wrong while creating subcategory." });
 //     }
 // });
-// router.patch("/subcategory/:id", adminValidator.addSubCategoryValidator, validate, subCategoryController.updateSubcategory);
-router.patch("/subcategory/:id", updateSubcategory);
+// router.patch("/subcategory/:id", updateSubcategory);
 
-// router.delete("/subcategory/:id", subCategoryController.deleteSubcategory);
 
 module.exports = router;
