@@ -39,16 +39,19 @@ app.use("/admin/categories", require("./routes/admin/categoryRouter"));
 app.use("/admin/subcategories", subCategoryRouter);
 app.use("/admin/products", require("./routes/admin/productRouter"));
 app.use("/admin/users", require("./routes/admin/userRouter"));
+app.use("/admin/brand", require("./routes/admin/brandRouter"));
+
 // app.use("/", require("./routes/public/mainRoutes"));
 
 // Start the server
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-
-// connectDB().then(() => {
-//   app.listen(process.env.port, () => {
-//     console.log("listening for requests");
-//   });
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
 // });
+
+connectDB().then(() => {
+  app.listen(process.env.port, () => {
+    console.log(`Server is running on port ${port}`);
+    console.log("listening for requests");
+  });
+});
