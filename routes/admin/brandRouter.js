@@ -1,7 +1,7 @@
 const express = require('express');
 const brandController = require('../../controllers/admin/brandController');
 const adminValidator = require('../../middlewares/adminValidators');
-const { validate } = require('../../middlewares/index');
+const validate = require('../../middlewares/index');
 
 const router = express.Router();
 

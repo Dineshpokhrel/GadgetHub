@@ -4,104 +4,177 @@ const { unlinkFile } = require('../../utils/file');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// Helper function to generate JWT token
+const generateToken = (user) => {
+  const secretKey = 'secret-key'; // Replace this with your own secret key
+  const payload = {
+    userId: user._id,
+    role: user.role // Include the role property in the token payload
+  };
+  return jwt.sign(payload, secretKey, { expiresIn: '1h' });
+};
+
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
-    // Check if the user already exists
+    // Check if the user already exists with the given email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(409).json({ message: 'User with the provided email already exists' });
     }
 
-    // Hash the password
+    // Hash the password before saving to the database
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user in the database
-    const newUser = await User.create({
+    // Create the new user with the provided role
+    const user = new User({
       name,
       email,
       password: hashedPassword,
+      role // Assign the provided role to the new user
     });
 
-    // Create a JWT for the user
-    const secretKey = "your_secret_key"; // Replace with your actual secret key
-    const expiresIn = "1h"; // Token expiration time, e.g., "1h" for 1 hour
-    const token = jwt.sign({ id: newUser._id }, secretKey, { expiresIn });
+    // Save the user to the database
+    await user.save();
 
-    // Return the token and user data
-    res.status(201).json({
-      token,
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-      },
-    });
+    // Generate a JWT token
+    const token = generateToken(user);
+
+    // Include the role property in the user object before sending it in the response
+    const userWithRole = { ...user._doc, role };
+
+    // Remove the hashed password from the user object before sending it in the response
+    const userWithoutPassword = { ...userWithRole };
+    delete userWithoutPassword.password;
+
+    res.status(201).json({ message: 'User registration successful', token, user: userWithoutPassword });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Something went wrong" });
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Something went wrong' });
   }
 };
 
-const getUsers = async (req, res) => {
+
+const loginUser = async (req, res) => {
   try {
-    const users = await User.find({
-      role: 'user',
-    }).select("-password").sort({ "_id": -1 }).populate('order', "_id");
+    const { email, password } = req.body;
 
-    res.status(200).json({
-      status: true,
-      message: "Successfully fetched users.",
-      data: users
-    });
-  } catch (err) {
-    res.status(400).json({ status: false, message: "Error fetching users" });
+    // Check if the user exists with the given email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Compare the password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Generate a JWT token
+    const token = generateToken(user);
+
+    // Remove the hashed password from the user object before sending it in the response
+    const userWithoutPassword = { ...user._doc };
+    delete userWithoutPassword.password;
+
+    res.status(200).json({ message: 'Login successful', token, user: userWithoutPassword });
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    res.status(500).json({ message: 'Something went wrong' });
   }
 };
 
+
+
+// Get all users
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error('Error while getting all users:', error);
+    res.status(500).json({ message: 'An error occurred while getting all users' });
+  }
+};
+
+
+// Get user by ID
+const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Error while getting user:', error);
+    res.status(500).json({ message: 'An error occurred while getting user' });
+  }
+};
+
+
+// Update user by ID
 const updateUser = async (req, res) => {
+  const { name, email, password, role } = req.body; // Include the 'role' field in the request body
+
   try {
-    const { role, status } = req.body;
+    let user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-    const user = await User.findByIdAndUpdate(req.params.id, { role, status }, { new: true });
+    // Update user data
+    user.name = name;
+    user.email = email;
+    user.role = role || user.role; // Update the user's role if provided, otherwise keep the existing role
 
-    res.status(200).json({ status: true, message: "Successfully updated user", data: user });
+    // Hash the new password if provided
+    if (password) {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    // Remove the hashed password from the updated user object before sending it in the response
+    const userWithoutPassword = { ...user._doc };
+    delete userWithoutPassword.password;
+
+    res.status(200).json({ message: 'User updated successfully', user: userWithoutPassword });
   } catch (error) {
-    res.status(400).json({ status: false, message: 'Error updating users' });
+    console.error('Error while updating user:', error);
+    res.status(500).json({ message: 'An error occurred while updating user' });
   }
 };
 
+
+// Delete user by ID
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-    if (user) {
-      try {
-        if (user.avatar) {
-          const filePath = user.avatar.substring(1);
-          unlinkFile(filePath);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-      return res.status(200).json({ status: true, data: user, message: "User deleted successfully." });
-    } else {
-      return res.status(404).json({
-        status: false,
-        message: "User not found",
-      });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-  } catch (err) {
-    return res.status(400).json({
-      status: false,
-      message: "Something went wrong while deleting."
-    });
+
+    // Remove the hashed password from the deleted user object before sending it in the response
+    const userWithoutPassword = { ...user._doc };
+    delete userWithoutPassword.password;
+
+    res.status(200).json({ message: 'User deleted successfully', user: userWithoutPassword });
+  } catch (error) {
+    console.error('Error while deleting user:', error);
+    res.status(500).json({ message: 'An error occurred while deleting user' });
   }
 };
 
 module.exports = {
   registerUser,
-  getUsers,
+  loginUser,
+  getAllUsers,
+  getUser,
   updateUser,
   deleteUser,
 
