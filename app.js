@@ -40,6 +40,7 @@ app.use("/admin/subcategories", subCategoryRouter);
 app.use("/admin/products", require("./routes/admin/productRouter"));
 app.use("/admin/users", require("./routes/admin/userRouter"));
 app.use("/admin/brand", require("./routes/admin/brandRouter"));
+app.use("/admin/order", require("./routes/admin/orderRouter"));
 
 // app.use("/", require("./routes/public/mainRoutes"));
 
