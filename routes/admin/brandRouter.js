@@ -9,7 +9,7 @@ router.get('/brands', brandController.getBrands);
 
 router.post('/brand', adminValidator.addBrandValidator, validate, brandController.addBrand);
 
-router.patch('/brand/:id', adminValidator.addBrandValidator, validate, brandController.updateBrand);
+router.put('/brand/:id', adminValidator.addBrandValidator, validate, brandController.updateBrand);
 
 router.delete('/brand/:id', brandController.deleteBrand);
 

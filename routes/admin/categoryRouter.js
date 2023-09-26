@@ -7,7 +7,7 @@ const Category = require('../../models/category');
 
 router.get("/categories", categoryController.getCategories);
 router.post("/category", adminValidator.addCategoryValidator, validate, categoryController.addCategory);
-router.patch("/category/:id", adminValidator.addCategoryValidator, validate, categoryController.updateCategory);
+router.put("/category/:id", adminValidator.addCategoryValidator, validate, categoryController.updateCategory);
 router.delete("/category/:id", categoryController.deleteCategory);
 
 

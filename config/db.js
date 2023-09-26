@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 // const DB_URI = "mongodb://localhost:27017/testing_gadgethub";
-const DB_URI = "mongodb://127.0.0.1:27017/testing_gadgethub"
+// const DB_URI = "mongodb://127.0.0.1:27017/testing_gadgethub"
+const DB_URI = "mongodb+srv://dinesh:dinesh123@dinesh.tfbmsg5.mongodb.net/testing_gadgethub?retryWrites=true&w=majority"
 
 const connectDB = async () => {
   try {

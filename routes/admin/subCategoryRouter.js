@@ -10,7 +10,7 @@ const adminValidator = require('../../middlewares/adminValidators');
 router.get("/subcategories", subCategoryController.getSubCategories);
 router.get("/subcategories-of-category/:id", subCategoryController.getSubCategoriesOfCategory);
 router.post("/subcategory", adminValidator.addSubCategoryValidator, validate, subCategoryController.addSubCategory);
-router.patch("/subcategory/:id", adminValidator.addSubCategoryValidator, validate, subCategoryController.updateSubcategory);
+router.put("/subcategory/:id", adminValidator.addSubCategoryValidator, validate, subCategoryController.updateSubcategory);
 router.delete("/subcategory/:id", subCategoryController.deleteSubcategory);
 
 
